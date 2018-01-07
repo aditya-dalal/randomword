@@ -5,7 +5,7 @@ Prerequisites:
 - Place input words file at /tmp/words_alpha.txt
 
 Run tests
-- go test -v
+- go test ./... -v
 
 Create executable
 - go build
