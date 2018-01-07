@@ -14,8 +14,8 @@ import (
 
 const FILE = "/tmp/words_alpha.txt"
 
-func GetDictionary() (*core.FileDictionary, error) {
-	dictionary := &core.FileDictionary{File: FILE}
+func GetDictionary(file string) (*core.FileDictionary, error) {
+	dictionary := &core.FileDictionary{File: file}
 	err := dictionary.LoadWords()
 	if err != nil {
 		return nil, err
@@ -25,12 +25,15 @@ func GetDictionary() (*core.FileDictionary, error) {
 
 func GetRandomWords(dictionary core.Dictionary, num int) ([]string, error) {
 	words := dictionary.GetWords()
+	if len(words) == 0 {
+		return nil, errors.New("No words in dictionary")
+	}
 	if num >= len(words) {
 		return nil, errors.New("Random number count is greater than available words")
 	}
 	var result []string
 	for i := 0; i < num; i++ {
-		index := lib.GetRandomInt(i, len(words))
+		index, _ := lib.GetRandomInt(i, len(words))
 		words[i], words[index] = words[index], words[i]
 		result = append(result, words[i])
 	}
@@ -43,13 +46,13 @@ func PrintWords(words []string) {
 	}
 }
 
-func ParseParameter() (int, error) {
+func ParseParameter(args []string) (int, error) {
 	var num int
 	var err error
-	if len(os.Args) < 2 {
+	if len(args) < 2 {
 		num = 1
 	} else {
-		num, err = strconv.Atoi(os.Args[1])
+		num, err = strconv.Atoi(args[1])
 		if err != nil || num < 1 {
 			return 0, errors.New("Please provide positive integer as parameter")
 		}
@@ -59,12 +62,12 @@ func ParseParameter() (int, error) {
 
 func main() {
 	rand.Seed(time.Now().Unix())
-	num, err := ParseParameter()
+	num, err := ParseParameter(os.Args)
 	if err != nil {
 		log.Fatal(err)
 	}
 	var dictionary core.Dictionary
-	dictionary, err = GetDictionary()
+	dictionary, err = GetDictionary(FILE)
 	if err != nil {
 		log.Fatal(err)
 	}
